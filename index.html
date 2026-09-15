@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cognitive Bias Self-Assessment</title>
+<style>
+:root{--ink:#17352d;--muted:#66736f;--line:#dce5e1;--bg:#f5f8f6;--card:#fff;--accent:#357960;--accent2:#244f41;--soft:#e8f1ed}
+*{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+.container{max-width:920px;margin:auto;padding:28px 20px 60px}.hero{background:var(--ink);color:white;border-radius:22px;padding:38px;margin-bottom:22px}.hero h1{font-size:34px;margin:0 0 8px}.hero p{margin:6px 0;color:#dbe9e3}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:28px;margin:18px 0;box-shadow:0 5px 18px #17352d0b}
+h2{margin-top:0}.small{font-size:14px;color:var(--muted)} .progress{height:8px;background:#dfe8e4;border-radius:99px;overflow:hidden;margin:12px 0 25px}.bar{height:100%;width:0;background:var(--accent);transition:.25s}
+.input{width:100%;padding:13px 14px;border:1px solid #cbd8d3;border-radius:10px;font-size:16px;margin:6px 0 14px}
+.scale{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:22px}.option{position:relative}.option input{position:absolute;opacity:0}.option label{display:flex;align-items:center;justify-content:center;text-align:center;min-height:64px;padding:8px;border:1px solid var(--line);border-radius:11px;cursor:pointer;font-size:13px;background:#fff}.option input:checked+label{background:var(--soft);border:2px solid var(--accent);font-weight:700}
+.actions{display:flex;gap:10px;justify-content:space-between;margin-top:22px}.btn{border:0;border-radius:11px;padding:12px 20px;font-weight:700;cursor:pointer;font-size:15px}.primary{background:var(--accent);color:white}.secondary{background:#e8efec;color:var(--ink)}.danger{background:#fff0ee;color:#8b3025}
+.hidden{display:none!important}.question-no{font-size:13px;color:var(--accent);font-weight:800;text-transform:uppercase;letter-spacing:.08em}.scenario{font-size:21px;line-height:1.4;margin:10px 0 6px}.hint{font-size:14px;color:var(--muted)}
+.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.bias-card{border:1px solid var(--line);border-radius:14px;padding:18px}.score-row{display:flex;justify-content:space-between;font-weight:700}.meter{height:10px;background:#e5ece9;border-radius:99px;margin:10px 0 8px;overflow:hidden}.meter span{display:block;height:100%;background:var(--accent)}.tag{display:inline-block;padding:4px 9px;border-radius:99px;background:var(--soft);font-size:12px;font-weight:700}
+.primary-bias{border-left:4px solid var(--accent);padding-left:14px;margin:18px 0}.primary-bias h3{margin-bottom:4px}
+.reflection textarea{width:100%;min-height:90px;border:1px solid #cbd8d3;border-radius:10px;padding:12px;font:inherit}
+.footer{font-size:12px;color:var(--muted);margin-top:25px}
+@media(max-width:700px){.scale{grid-template-columns:repeat(2,1fr)}.result-grid{grid-template-columns:1fr}.hero h1{font-size:28px}}
+@media print{body{background:white}.container{max-width:none;padding:0}.hero{color:black;background:white;border:0;padding:0}.hero p{color:#333}.no-print{display:none!important}.card{box-shadow:none;break-inside:avoid}.result-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="hero">
+  <h1>Cognitive Bias Self-Assessment</h1>
+  <p>A short behavioural reflection on how cognitive shortcuts may influence your thinking and decisions.</p>
+  <p class="small" style="color:#bcd1c9">18 scenarios • approximately 7–10 minutes • self-reflection, not diagnosis</p>
+</div>
+
+<section id="intro" class="card">
+<h2>Before you begin</h2>
+<p>There are no right or wrong answers. Each scenario has several plausible responses. Choose the option that is closest to how you would <strong>actually</strong> approach the situation, rather than the response that sounds most ideal.</p>
+<p>Answer based on what you <strong>actually tend to do</strong>, especially when making decisions quickly or under pressure, rather than what you think you should do.</p>
+<label>Name</label><input id="name" class="input" placeholder="Your name">
+<label>Role / designation <span class="small">(optional)</span></label><input id="role" class="input" placeholder="e.g., Manager, Consultant, Student">
+<button class="btn primary" onclick="start()">Begin assessment</button>
+</section>
+
+<section id="assessment" class="card hidden">
+<div class="no-print">
+<div class="question-no" id="qNo"></div>
+<div class="progress"><div id="bar" class="bar"></div></div>
+<div class="scenario" id="scenario"></div>
+<div class="hint">Choose the response that is closest to your usual approach.</div>
+<div id="options" class="scale"></div>
+<div class="actions"><button class="btn secondary" onclick="prev()">Back</button><button id="nextBtn" class="btn primary" onclick="next()">Next</button></div>
+</div>
+</section>
+
+<section id="report" class="hidden">
+<div class="card">
+<h2 id="reportTitle">Your Cognitive Thinking Profile</h2>
+<p id="date"></p>
+<div id="summary"></div>
+</div>
+<div class="card">
+<h2>Your Bias Profile</h2>
+<div id="chart"></div>
+</div>
+<div class="card">
+<h2>Your Primary Cognitive Biases</h2>
+<div id="primary"></div>
+</div>
+<div class="card">
+<h2>Biases That Appear Less Prominent</h2>
+<div id="lower"></div>
+</div>
+<div class="card">
+<h2>Cross-Bias Insights</h2>
+<div id="cross"></div>
+</div>
+<div class="card">
+<h2>Your Cognitive Bias Action Plan</h2>
+<div id="actionsReport"></div>
+</div>
+<div class="card footer">
+<strong>Important:</strong> This assessment is designed for self-reflection and learning. It is not a clinical, psychological or diagnostic assessment. Cognitive biases are common features of human thinking, and results represent patterns suggested by your responses rather than fixed characteristics.
+</div>
+<div class="no-print" style="display:flex;gap:10px;margin-top:18px">
+<button class="btn primary" onclick="window.print()">Download / Save as PDF</button>
+<button class="btn secondary" onclick="location.reload()">Take again</button>
+</div>
+</section>
+</div>
+
+<script>
+const questions=[
+{scenario:"You are reviewing a proposal from a vendor. The vendor's first estimate is ₹18 lakh. After reviewing the scope, your team has a different view of what the work may cost.",options:[
+["Use ₹18 lakh as the starting point and adjust it based on the new information.",{anchoring:1}],
+["Ignore the first figure and build an estimate independently from the scope.",{anchoring:0}],
+["Ask the vendor to explain how they arrived at ₹18 lakh before deciding.",{anchoring:.35}],
+["Compare the estimate with two or three similar projects before forming a view.",{anchoring:.1}]
+]},
+{scenario:"A colleague who is usually reliable makes an unusually poor decision. You are asked whether this should affect how you view their performance.",options:[
+["It is probably a sign that something has changed in their overall performance.",{selective:.9,availability:.25}],
+["I would want to look at a broader pattern before changing my view.",{selective:0}],
+["I would focus mainly on understanding what happened in this instance.",{selective:.1}],
+["I would compare this incident with their recent work and expectations.",{selective:.05}]
+]},
+{scenario:"You strongly support a proposed change. During the discussion, someone presents information that raises concerns about the change.",options:[
+["Look closely at whether the concerns are based on reliable evidence.",{confirmation:.35}],
+["Ask what additional evidence would be needed to show that the concerns are valid.",{confirmation:.05}],
+["Explain why the original proposal still makes sense given the wider picture.",{confirmation:.65}],
+["Explore both the strongest case for the change and the strongest case against it.",{confirmation:0}]
+]},
+{scenario:"Your leadership team is discussing which customer segment to prioritise. One segment has received a lot of attention recently because of several highly visible success stories.",options:[
+["Give that segment serious weight because the recent results are encouraging.",{availability:.7}],
+["Look at the broader data before deciding how representative those examples are.",{availability:0}],
+["Ask whether the success stories came from circumstances that may not repeat.",{availability:.05}],
+["Compare the segment with other opportunities using the same criteria.",{availability:0}]
+]},
+{scenario:"You are in a meeting where most senior leaders quickly support one option. You are not yet convinced, but you also do not see an obvious reason to object.",options:[
+["Go with the group unless there is a strong reason not to.",{bandwagon:1}],
+["State that you need more information before supporting the option.",{bandwagon:.15}],
+["Share your concerns even if you cannot yet offer an alternative.",{bandwagon:0}],
+["Ask someone to argue the case against the group's preferred option.",{bandwagon:0}]
+]},
+{scenario:"A project is six months in. It has consumed significant time and budget, but the expected value is now uncertain.",options:[
+["Continue for a little longer because so much has already been invested.",{choice:1}],
+["Review whether you would start the project today with what you now know.",{choice:0}],
+["Give the team more time because stopping now would mean the earlier effort was wasted.",{choice:.9}],
+["Compare the remaining investment with the value of the alternatives available now.",{choice:0}]
+]},
+{scenario:"A decision you made last quarter produced an excellent result. Looking back, how would you describe the decision?",options:[
+["It was a strong decision because it clearly led to a good outcome.",{outcome:1}],
+["The outcome matters, but I would also examine what information and reasoning were available at the time.",{outcome:0}],
+["A good outcome increases my confidence that the decision was sound.",{outcome:.65}],
+["I would want to know whether the same process would be sensible if repeated.",{outcome:0}]
+]},
+{scenario:"You are asked to estimate the likelihood that a new initiative will succeed. You have limited data, but you know the area well.",options:[
+["Give a fairly precise estimate based on my experience.",{overconfidence:.8}],
+["Give an estimate but make the uncertainty explicit.",{overconfidence:.1}],
+["Ask what evidence or assumptions the estimate should be based on.",{overconfidence:0}],
+["Offer a range rather than a single confident number.",{overconfidence:0}]
+]},
+{scenario:"You are selecting between four candidates. One candidate has an impressive achievement that stands out immediately.",options:[
+["Give that achievement substantial weight because it is strong evidence of capability.",{availability:.65,selective:.35}],
+["Look at the full set of evidence against the same criteria for everyone.",{availability:0,selective:0}],
+["Ask whether the achievement is relevant to the actual demands of the role.",{availability:.05,selective:0}],
+["Compare examples of performance across all candidates before deciding.",{availability:0,selective:0}]
+]},
+{scenario:"A senior leader gives you a confident view of why a project is likely to succeed. You were undecided before the conversation.",options:[
+["Their experience makes me more comfortable adopting that view.",{anchoring:.65,bandwagon:.35}],
+["I would treat their view as one input and form my own assessment.",{anchoring:0,bandwagon:0}],
+["I would ask what evidence led them to that conclusion.",{anchoring:.1,bandwagon:0}],
+["I would compare their view with other evidence before changing my position.",{anchoring:.05,bandwagon:0}]
+]},
+{scenario:"A project fails despite the team having followed a reasonable process based on the information available at the time. In the review, what feels most useful?",options:[
+["Understand why the decision failed so we do not repeat it.",{outcome:.65}],
+["Examine whether the decision-making process was sound given what was known then.",{outcome:0}],
+["Identify who made the call and what they could have done differently.",{outcome:.55}],
+["Look at both the decision process and the external factors that affected the result.",{outcome:0}]
+]},
+{scenario:"You predicted that a new initiative would struggle. It does struggle. In the review, you are asked what you think.",options:[
+["The warning signs were there, so the outcome was fairly predictable.",{hindsight:1}],
+["There were warning signs, but I would also consider what was uncertain at the time.",{hindsight:.15}],
+["I would compare my original prediction with what I actually knew then.",{hindsight:0}],
+["It is useful to examine what could have happened differently as well.",{hindsight:0}]
+]},
+{scenario:"You receive mixed feedback about a team member. Some examples support your existing view of them, while others do not.",options:[
+["Give more weight to the examples that fit the pattern I have already seen.",{selective:.9,confirmation:.35}],
+["Step back and list the evidence that supports and challenges my current view.",{selective:0,confirmation:0}],
+["Ask for more specific examples before reaching a conclusion.",{selective:.05,confirmation:0}],
+["Consider whether my existing impression is affecting how I interpret the feedback.",{selective:0,confirmation:0}]
+]},
+{scenario:"A new piece of information challenges a position you have defended publicly.",options:[
+["First explain why the new information may not change the bigger picture.",{confirmation:.8}],
+["Consider whether the new information genuinely changes any of my assumptions.",{confirmation:.1}],
+["Ask someone I trust to assess the evidence independently.",{confirmation:0}],
+["Change my position if the evidence warrants it, even if that is uncomfortable.",{confirmation:0}]
+]},
+{scenario:"You need to decide whether to launch a product feature. You have strong experience in the market but incomplete data.",options:[
+["Trust my judgement and move ahead because experience is usually a good guide.",{overconfidence:.8}],
+["Move ahead only after identifying the assumptions that could make the decision wrong.",{overconfidence:0}],
+["Run a small test before making the full decision.",{overconfidence:0}],
+["Seek another perspective specifically to challenge my assumptions.",{overconfidence:0}]
+]},
+{scenario:"A familiar approach has worked several times in the past. The current situation is different, but the team is under time pressure.",options:[
+["Use the familiar approach because it has already worked for us.",{choice:.6,confirmation:.4}],
+["Use it as a starting point but check whether the current conditions are comparable.",{choice:.1,confirmation:.05}],
+["Pause long enough to identify what is different about the current situation.",{choice:0,confirmation:0}],
+["Consider whether a different approach would now create more value.",{choice:0,confirmation:0}]
+]},
+{scenario:"A dramatic incident is discussed in a leadership meeting. It is unusual but highly memorable. The group begins treating it as an important indicator of a wider problem.",options:[
+["Take it seriously because unusual incidents can reveal emerging problems.",{availability:.8}],
+["Ask how often this type of incident actually occurs before drawing a wider conclusion.",{availability:0}],
+["Investigate the incident, but avoid using it alone to describe the wider pattern.",{availability:.05}],
+["Look for data from a larger sample before changing the overall assessment.",{availability:0}]
+]},
+{scenario:"After a difficult meeting, you feel confident that you understood why another person reacted negatively. You are considering how to handle the next conversation.",options:[
+["Act on my interpretation because I usually read these situations accurately.",{overconfidence:.8,selective:.3}],
+["Treat my interpretation as one possible explanation and check it with them.",{overconfidence:0,selective:0}],
+["Consider two or three alternative explanations before deciding what to do.",{overconfidence:0,selective:0}],
+["Wait for more information before assuming I know what drove their reaction.",{overconfidence:0,selective:0}]
+]}
+];
+
+const biases={
+anchoring:{name:"Anchoring Bias",def:"Giving disproportionate weight to the first piece of information encountered when making a judgement or decision.",watch:["I keep returning to the first number, opinion or estimate.","The first option becomes my reference point without deliberate comparison."],tips:["Before deciding, generate an independent estimate before looking at the existing number.","Ask: “If I had never seen the first figure, what would I estimate now?”","Use multiple reference points rather than a single starting point."]},
+availability:{name:"Availability Heuristic",def:"Judging how likely or important something is based partly on how easily examples come to mind.",watch:["A vivid recent example strongly shapes my judgement.","What I remember most easily feels like what happens most often."],tips:["Ask whether memorable evidence is also representative evidence.","Look for base rates, broader data or a larger sample.","Separate “easy to recall” from “actually common.”"]},
+confirmation:{name:"Confirmation Bias",def:"Tending to notice, interpret or seek information in ways that support an existing belief or expectation.",watch:["I mainly collect evidence that supports my view.","Contradictory information feels easier to dismiss."],tips:["Ask: “What evidence would change my mind?”","Actively search for the strongest argument against your position.","Invite someone who disagrees with you to stress-test your reasoning."]},
+bandwagon:{name:"Bandwagon Bias",def:"Becoming more likely to accept an idea, behaviour or judgement because many other people appear to support it.",watch:["Consensus makes an option feel more correct.","I hesitate to challenge a popular view."],tips:["Write down your independent view before hearing the group.","Ask what evidence supports the consensus.","Give dissenting perspectives explicit space in decisions."]},
+choice:{name:"Choice-Supportive Bias",def:"After making a choice, tending to remember or evaluate the chosen option more favourably and the alternatives less favourably.",watch:["I mainly remember why my choice was right.","Changing course feels like admitting the original decision was wrong."],tips:["Review the decision using evidence rather than loyalty to the choice.","Separate the quality of the decision from the quality of the outcome.","Set predefined review points where changing direction is acceptable."]},
+outcome:{name:"Outcome Bias",def:"Judging the quality of a decision mainly by its eventual result rather than by the information and reasoning available when the decision was made.",watch:["A good result makes a decision seem wise in hindsight.","A poor result makes me judge the decision as bad even when the process was reasonable."],tips:["Evaluate the decision using information available at the time.","Ask whether a different outcome could have occurred by chance.","Review both process quality and outcome separately."]},
+overconfidence:{name:"Overconfidence",def:"Having greater confidence in one's judgement, knowledge or ability than the available evidence warrants.",watch:["I feel sufficiently certain without checking.","I find it easier to identify others' blind spots than my own."],tips:["Distinguish confidence from evidence.","State your confidence level and what could make it change.","Use a second opinion for high-impact decisions."]},
+selective:{name:"Selective Perception Bias",def:"Paying greater attention to information that fits an existing expectation or frame while overlooking information that does not.",watch:["I notice behaviours that fit my existing impression.","My interpretation changes depending on what I already expect to see."],tips:["Separate observation from interpretation.","Record specific behaviours before assigning meaning.","Ask: “What else could explain what I am seeing?”"]},
+hindsight:{name:"Hindsight Bias",def:"After an event occurs, seeing the outcome as having been more predictable or foreseeable than it actually was beforehand.",watch:["After an outcome, I think I knew it would happen.","I underestimate how uncertain the situation felt at the time."],tips:["Keep a decision log with predictions and assumptions.","Review what was actually knowable before the outcome.","Ask what alternative outcomes were plausible at the time."]}
+};
+
+let idx=0, answers=[], shuffled=[];
+function start(){if(!document.getElementById("name").value.trim()){alert("Please enter your name.");return} document.getElementById("intro").classList.add("hidden");document.getElementById("assessment").classList.remove("hidden");shuffled=[...questions].sort(()=>Math.random()-.5);render();}
+function render(){let q=shuffled[idx];document.getElementById("qNo").textContent=`Scenario ${idx+1} of ${shuffled.length}`;document.getElementById("bar").style.width=((idx)/shuffled.length*100)+"%";document.getElementById("scenario").textContent=q.scenario;let saved=answers[idx];document.getElementById("options").innerHTML=q.options.map((o,i)=>`<div class="option"><input ${saved===i?"checked":""} type="radio" name="answer" id="a${i}" value="${i}"><label for="a${i}">${o[0]}</label></div>`).join("");document.getElementById("nextBtn").textContent=idx===shuffled.length-1?"Finish":"Next";}
+function getAnswer(){let e=document.querySelector('input[name="answer"]:checked');return e?Number(e.value):null}
+function next(){let a=getAnswer();if(a===null){alert("Please choose the response that is closest to how you would usually approach the situation.");return}answers[idx]=a;if(idx<shuffled.length-1){idx++;render()}else{document.getElementById("assessment").classList.add("hidden");generateReport();}}
+function prev(){if(idx>0){idx--;render()}}
+function scoreAll(){let s={};Object.keys(biases).forEach(b=>s[b]=0);let max={};Object.keys(biases).forEach(b=>max[b]=0);shuffled.forEach((q,i)=>{q.options.forEach(o=>Object.entries(o[1]).forEach(([b,w])=>max[b]+=w));let selected=q.options[answers[i]];if(selected)Object.entries(selected[1]).forEach(([b,w])=>s[b]+=w);});let out={};Object.keys(biases).forEach(b=>out[b]=max[b]?Math.round((s[b]/max[b])*100):0);return out}
+function level(x){return x<40?"Lower presence":x<70?"Moderate presence":"Higher presence"}
+function generateReport(){let scores=scoreAll();let ranked=Object.keys(scores).sort((a,b)=>scores[b]-scores[a]);let high=ranked.slice(0,3),low=ranked.slice(-3).reverse();let name=document.getElementById("name").value.trim(),role=document.getElementById("role").value.trim();document.getElementById("report").classList.remove("hidden");document.getElementById("reportTitle").textContent=`${name}'s Cognitive Thinking Profile`;document.getElementById("date").textContent=new Date().toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"})+(role?` • ${role}`:"");
+let top=high.map(b=>biases[b].name).join(", ");let summary=`Your responses suggest that the patterns most worth watching are <strong>${top}</strong>. These are not fixed traits or diagnoses. They are areas where your responses indicate that a particular thinking shortcut may influence judgement more readily. The most useful next step is to notice when the pattern appears and deliberately introduce a check before acting.`;
+document.getElementById("summary").innerHTML=`<p>${summary}</p>`;
+document.getElementById("chart").innerHTML=ranked.map(b=>`<div class="bias-card"><div class="score-row"><span>${biases[b].name}</span><span>${scores[b]}</span></div><div class="meter"><span style="width:${scores[b]}%"></span></div><span class="tag">${level(scores[b])}</span></div>`).join("");
+document.getElementById("primary").innerHTML=high.map((b,i)=>`<div class="primary-bias"><h3>${i+1}. ${biases[b].name} <span class="tag">${scores[b]}/100</span></h3><p><strong>What it is:</strong> ${biases[b].def}</p><p><strong>What your responses suggest:</strong> ${primaryText(b,scores[b])}</p><p><strong>How it may show up:</strong> ${showText(b)}</p><p><strong>Watch for:</strong></p><ul>${biases[b].watch.map(x=>`<li>${x}</li>`).join("")}</ul><p><strong>Work around it:</strong></p><ul>${biases[b].tips.map(x=>`<li>${x}</li>`).join("")}</ul></div>`).join("");
+document.getElementById("lower").innerHTML=low.map(b=>`<div class="primary-bias"><h3>${biases[b].name} <span class="tag">${scores[b]}/100</span></h3><p>Your responses suggest this pattern is less prominent relative to the other patterns measured. This may indicate a relative strength in this area, while remembering that any bias can still appear in particular situations.</p></div>`).join("");
+document.getElementById("cross").innerHTML=crossInsights(scores,high).map(x=>`<p>• ${x}</p>`).join("");
+document.getElementById("actionsReport").innerHTML=actionPlan(high).map((x,i)=>`<p><strong>${i+1}. ${x[0]}</strong><br>${x[1]}</p>`).join("");
+window.scrollTo(0,0);}
+function primaryText(b,s){if(s>=70)return `Your responses indicate a relatively high susceptibility to this pattern. It may become more noticeable when decisions are fast, ambiguous or emotionally engaging.`;if(s>=40)return `Your responses indicate a moderate tendency toward this pattern. It may appear selectively depending on the situation.`;return `Your responses indicate a comparatively lower tendency toward this pattern in the situations represented by this assessment.`}
+function showText(b){const m={anchoring:"initial numbers, estimates or opinions becoming strong reference points",availability:"vivid or memorable examples shaping how likely or important something feels",confirmation:"evaluating new information through the lens of an existing view",bandwagon:"group consensus making an option feel safer or more correct",choice:"defending or favouring a decision after it has already been made",outcome:"using the result of a decision as evidence of whether the decision itself was good",overconfidence:"moving ahead with a high degree of certainty before enough evidence has been checked",selective:"noticing behaviours or evidence that fit an existing impression",hindsight:"remembering an uncertain outcome as though it had been obvious beforehand"};return `It may show up through ${m[b]}.`}
+function crossInsights(s,h){let a=[];if(s.anchoring>=70&&s.overconfidence>=60)a.push("You may benefit particularly from separating confidence from evidence: a strong initial judgement can become harder to revisit when you also feel highly certain.");if(s.confirmation>=70&&s.selective>=60)a.push("Your information pattern suggests a possible tendency to interpret new evidence through an existing frame. Deliberately seeking disconfirming information may be especially useful.");if(s.bandwagon>=60&&s.confirmation>=60)a.push("When a group already has a preferred view, you may want to form an independent position before the discussion becomes anchored around consensus.");if(s.availability>=60)a.push("Memorable examples may have more influence on your judgement than their actual frequency warrants. Data and base rates can act as a useful counterweight.");if(s.outcome>=60&&s.choice>=60)a.push("You may benefit from reviewing decisions separately from their outcomes, especially when deciding whether to continue, stop or change course.");if(!a.length)a.push("Your results are relatively balanced. The useful development opportunity is not eliminating bias, but building a repeatable pause-and-check habit before important decisions.");return a.slice(0,4)}
+function actionPlan(high){let map={anchoring:["Reset the reference point","Make your own estimate before reviewing someone else's number or recommendation."],availability:["Check the base rate","When a vivid example comes to mind, ask how representative it really is and seek broader evidence."],confirmation:["Run a disconfirmation check","Before finalising a view, identify the strongest evidence that could prove you wrong."],bandwagon:["Form a view before the room","Write your initial judgement privately before hearing the group's preferred answer."],choice:["Schedule decision reviews","Create predefined points where changing course is treated as learning rather than failure."],outcome:["Separate process from outcome","Ask whether the decision was reasonable given what was known at the time."],overconfidence:["Calibrate your certainty","State what you know, what you are assuming and what evidence would change your confidence."],selective:["Separate observation from interpretation","Write down what actually happened before deciding what the behaviour means."],hindsight:["Keep a decision log","Record predictions and assumptions before outcomes occur so future reviews are fairer."]};return high.map(b=>map[b])}
+function esc(x){return x.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+</script>
+</body>
+</html>
